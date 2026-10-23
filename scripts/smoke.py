@@ -21,6 +21,8 @@ socket = Path(runtime.name) / "tmux.sock"
 session = "polisee-tui-smoke"
 target = session
 binary = project / "bin" / "polisee-tui"
+exit_status = artifacts / "smoke-exit-status.txt"
+exit_status.unlink(missing_ok=True)
 
 
 def tmux(*args, check=True):
@@ -104,8 +106,11 @@ try:
     assert launched.returncode == 0, f"Normal launcher failed: {launched.stderr.strip()}"
     assert "Office access" in launched.stdout, "Normal launcher did not render its demo"
     (artifacts / "launcher-terminal.ans").write_text(launched.stdout)
-    tmux("new-session", "-d", "-x", "140", "-y", "42", "-s", session,
-         shlex.join([str(binary)]))
+    # Older tmux versions do not expose pane_dead_status. Record the actual
+    # application status in the launcher shell and still require the pane to die.
+    launch = (shlex.quote(str(binary)) + '; result=$?; printf "%s" "$result" > ' +
+              shlex.quote(str(exit_status)) + '; exit "$result"')
+    tmux("new-session", "-d", "-x", "140", "-y", "42", "-s", session, launch)
     tmux("set-option", "-w", "-t", target, "remain-on-exit", "on")
     frame = wait_for("Office access", "Conditions", "Actions")
     assert "Ctrl+Q quit" in frame.splitlines()[-1], "quit shortcut is missing from the bottom bar"
@@ -247,7 +252,9 @@ try:
     deadline = time.monotonic() + 5
     status = ""
     while time.monotonic() < deadline:
-        status = tmux("display-message", "-p", "-t", target, "#{pane_dead} #{pane_dead_status}").strip()
+        dead = tmux("display-message", "-p", "-t", target, "#{pane_dead}").strip()
+        result = exit_status.read_text().strip() if exit_status.exists() else ""
+        status = dead + " " + result
         if status == "1 0":
             break
         time.sleep(0.08)
