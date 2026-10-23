@@ -1,0 +1,25 @@
+<POLICY_FOLDER ID="folder" NAME="Demonstration">
+<RULE ID="office" NAME="Office access" APP_VERSION="1.0" ENABLED="true" DESCRIPTION="Synthetic rule">
+ <GROUP_IN_FILTER><GROUP ID="staff" NAME="Office devices"/></GROUP_IN_FILTER>
+ <SUBNET address="192.0.2.0" prefix="24"/>
+ <EXCEPTION><RANGE FROM="192.0.2.10" TO="192.0.2.12"/></EXCEPTION>
+ <INACTIVITY_TTL VALUE="3600"/><MATCH_TIMING><DELAY VALUE="15"/></MATCH_TIMING>
+ <EXPRESSION EXPR_TYPE="AND">
+  <EXPRESSION EXPR_TYPE="OR">
+   <CONDITION FIELD_NAME="device.os" LABEL="Operating system" PLUGIN_NAME="Inventory" LOGIC="OR" LEFT_PARENTHESIS="1" RET_VALUE_ON_UKNOWN="IRRESOLVED">
+    <FILTER TYPE="equals" FILTER_ID="first" CASE_SENSITIVE="false"><VALUE VALUE="Example OS"/></FILTER>
+   </CONDITION>
+   <CONDITION FIELD_NAME="device.group" LABEL="Device group" RIGHT_PARENTHESIS="1" EMPTY_LIST_VALUE="false">
+    <FILTER TYPE="matches" MATCH_SUBTREE="true"><GROUP ID="staff" NAME="Office devices"/></FILTER>
+   </CONDITION>
+  </EXPRESSION>
+  <EXPRESSION EXPR_TYPE="NOT"><CONDITION FIELD_NAME="device.quarantined" LABEL="Quarantined" RET_VALUE_ON_UKNOWN="UNMATCH"><FILTER TYPE="equals"><VALUE VALUE2="true"/></FILTER></CONDITION></EXPRESSION>
+ </EXPRESSION>
+ <ACTION NAME="SEND_NOTIFICATION" DISABLED="false"><PARAM NAME="recipient" VALUE="ops@example.test"/><PARAM NAME="message">Synthetic test message</PARAM><SCHEDULE><DAILY TIME="09:00"/></SCHEDULE></ACTION>
+ <ACTION NAME="SET_GROUP" DISABLED="true"><PARAM NAME="group"><GROUP ID="guest" NAME="Guest devices"/></PARAM></ACTION>
+ <INNER_RULE ID="child" NAME="Guest access" ENABLED="false">
+  <!-- Rule expression element is stored at /does/not/exist/fixture.xml -->
+  <ADMISSION_RESOLVE_DELAY VALUE="30"/>
+  <INNER_RULE ID="grandchild" NAME="Nested disabled rule" ENABLED="true"><EXPRESSION EXPR_TYPE="SIMPLE"><CONDITION FIELD_NAME="device.name" LABEL="Name"><FILTER TYPE="contains"><VALUE VALUE="Guest"/></FILTER></CONDITION></EXPRESSION></INNER_RULE>
+ </INNER_RULE>
+</RULE></POLICY_FOLDER>
