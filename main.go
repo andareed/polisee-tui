@@ -12,9 +12,12 @@ import (
 	"github.com/andareed/polisee-tui/internal/tui"
 )
 
+var buildVersion = "0.1.0"
+
 func run(args []string, stdout, stderr io.Writer) error {
 	flags := flag.NewFlagSet("polisee-tui", flag.ContinueOnError)
 	flags.SetOutput(stderr)
+	showVersion := flags.Bool("version", false, "print the application version and exit")
 	snapshot := flags.Bool("snapshot", false, "print one terminal frame without starting an interactive session")
 	width := flags.Int("width", 120, "snapshot width in terminal cells")
 	height := flags.Int("height", 40, "snapshot height in terminal rows")
@@ -28,6 +31,10 @@ func run(args []string, stdout, stderr io.Writer) error {
 		if err == flag.ErrHelp {
 			return nil
 		}
+		return err
+	}
+	if *showVersion {
+		_, err := fmt.Fprintf(stdout, "polisee-tui %s\n", buildVersion)
 		return err
 	}
 	if flags.NArg() > 1 {

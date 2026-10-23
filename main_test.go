@@ -37,3 +37,13 @@ func TestSnapshotAndCLIValidation(t *testing.T) {
 		t.Fatal("usage missing")
 	}
 }
+
+func TestVersionDoesNotLoadAnExport(t *testing.T) {
+	var output, errors bytes.Buffer
+	if err := run([]string{"--version", "/does/not/exist.xml"}, &output, &errors); err != nil {
+		t.Fatal(err)
+	}
+	if output.String() != "polisee-tui "+buildVersion+"\n" || errors.Len() != 0 {
+		t.Fatalf("version output=%q errors=%q", output.String(), errors.String())
+	}
+}

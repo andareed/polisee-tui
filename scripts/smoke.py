@@ -34,7 +34,8 @@ def tmux(*args, check=True):
 
 
 def capture():
-    return tmux("capture-pane", "-p", "-t", target)
+    # tmux may compress padding into tab stops; compare displayed columns.
+    return tmux("capture-pane", "-p", "-t", target).expandtabs(8)
 
 
 def wait_for(*texts, timeout=8):
