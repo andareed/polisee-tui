@@ -1,8 +1,8 @@
 .PHONY: build run check race smoke
 build:
-	go build -buildvcs=false -o bin/polisee-tui .
+	CGO_ENABLED=0 go build -buildvcs=false -o bin/polisee-tui .
 run:
-	go run -buildvcs=false .
+	CGO_ENABLED=0 go run -buildvcs=false .
 check:
 	@test -z "$$(gofmt -l .)" || (gofmt -l .; exit 1)
 	go vet ./...

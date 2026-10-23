@@ -10,7 +10,7 @@ First stable release from the standalone Polisee TUI repository.
 
 ## Downloads
 
-Linux x86-64 and Windows x86-64. Run polisee-tui from a terminal. The private engine is compiled in: no library checkout or GitHub credentials are needed to run it. Source builds require the adjacent private polisee-lib repository.
+Linux x86-64 and Windows x86-64. The Linux download is statically linked and has no glibc or dynamic-loader dependency, suitable for headless servers with older glibc. Run the extracted polisee-tui executable from a terminal. The private engine is compiled in: no library checkout or GitHub credentials are needed to run it. Source builds require the adjacent private polisee-lib repository.
 
 Windows binaries are unsigned.
 

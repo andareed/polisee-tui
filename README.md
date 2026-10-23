@@ -6,6 +6,19 @@ condition hierarchy and compact detail sections. Names, descriptions and values
 lead; IDs remain visible and complete technical fields are available in a
 contextual inspector.
 
+## Download
+
+The [v0.1.0 Linux x86-64 release](https://github.com/andareed/polisee-tui/releases/tag/v0.1.0)
+contains a static executable named polisee-tui. Extract the archive, then run:
+
+```sh
+./polisee-tui /path/to/policies.xml
+```
+
+No desktop, library checkout or glibc installation is needed. An older executable
+named polisee-tui2 may come from the original project and use dynamic linking;
+use the released polisee-tui executable or rebuild this project.
+
 ## Run
 
 Requires Go 1.26+ and a UTF-8 terminal. Keep this module beside polisee-lib:
@@ -25,7 +38,10 @@ cd polisee-tui
 ./bin/polisee-tui --help
 ```
 
-The launcher rebuilds incrementally before starting. No global CLI, C compiler,
+The launcher rebuilds incrementally before starting. The launcher and Makefile
+build with `CGO_ENABLED=0`, producing a static Linux executable without a glibc
+or dynamic-loader dependency. This also supports headless servers with older
+glibc versions; a UTF-8 terminal is sufficient. No global CLI, C compiler,
 Node, desktop display or running GUI is required. Dependencies are pinned in
 go.mod/go.sum with the same sibling library replacement as the GUI.
 
