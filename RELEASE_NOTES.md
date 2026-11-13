@@ -1,17 +1,21 @@
-# Polisee TUI v0.1.0
+# Polisee TUI v0.2.0
 
-First stable release from the standalone Polisee TUI repository.
+Export an individual main policy from the terminal viewer.
 
-- Bubble Tea terminal policy inspection using polisee-lib v0.1.0.
-- Policy and rule navigation, filtering, visual and text expression views, contextual inspection, and keyboard/mouse selection and copying.
-- Open a local policy export or explore the embedded synthetic demonstration; use --snapshot for a single non-interactive frame.
-- New --version option reports the application version without opening an export.
-- Native layout verification expands tmux tab-compressed padding before comparing terminal columns and records the application exit status independently of tmux version.
+- Select a main policy and choose **Export** in the header, or press **Ctrl+E**, to choose a destination XML path. Tab completes paths and Escape cancels.
+- Exports use EyeSight's `RULES` format and preserve the complete policy, every subrule, and original XML metadata through polisee-lib v0.2.0.
+- Existing exports require replacement confirmation. The loaded source file, including aliases, is protected from overwriting.
+- Open single-policy exports directly in Polisee. Export controls stay available in narrow terminal layouts.
+- Linux builds remain statically linked for headless servers, including the launcher and Makefile correction made after v0.1.0.
 
 ## Downloads
 
-Linux x86-64 and Windows x86-64. The Linux download is statically linked and has no glibc or dynamic-loader dependency, suitable for headless servers with older glibc. Run the extracted polisee-tui executable from a terminal. The private engine is compiled in: no library checkout or GitHub credentials are needed to run it. Source builds require the adjacent private polisee-lib repository.
+Linux x86-64 and Windows x86-64. The Linux executable has no glibc or dynamic-loader dependency. Run `polisee-tui` from a UTF-8 terminal; `--version` reports `0.2.0`. The compiled engine is included, so downloads require no library checkout or GitHub credentials. Source builds require the adjacent private polisee-lib repository.
 
-Windows binaries are unsigned.
+Windows executables are unsigned and cross-compiled, without Windows runtime testing.
 
-Each archive includes BUILDINFO.json with exact source revisions. Verify downloads against SHA256SUMS. Only the reviewed synthetic demonstration is embedded; customer exports, TODO files and local configuration are excluded.
+Each archive includes `BUILDINFO.json` with exact committed source revisions, `VERSION`, and a runtime README. Verify downloads against `SHA256SUMS`. Only the reviewed synthetic demonstration is embedded; customer exports and local configuration are excluded.
+
+## Validation
+
+Checks, race tests, export/save/cancel/source-protection regression tests, and the native terminal smoke passed. The terminal smoke saves a main policy and verifies its subrules. Release binaries were built from clean Git exports without GitHub build runners. Linux version and snapshot checks passed; Windows PE executable headers were verified.

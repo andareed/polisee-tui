@@ -12,7 +12,7 @@ import (
 	"github.com/andareed/polisee-tui/internal/tui"
 )
 
-var buildVersion = "0.1.0"
+var buildVersion = "0.2.0"
 
 func run(args []string, stdout, stderr io.Writer) error {
 	flags := flag.NewFlagSet("polisee-tui", flag.ContinueOnError)

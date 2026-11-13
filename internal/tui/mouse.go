@@ -11,8 +11,17 @@ func (m *Model) click(mouse tea.Mouse) tea.Cmd {
 	if mouse.Button != tea.MouseLeft {
 		return nil
 	}
-	if mouse.Y == 0 && mouse.X >= m.width-18 {
-		return m.openFile()
+	if mouse.Y == 0 {
+		actions := plain(m.headerActions())
+		x := mouse.X - (m.width - len([]rune(actions)))
+		open := strings.Index(actions, "[Ctrl+O]")
+		export := strings.Index(actions, "[Ctrl+E]")
+		if open >= 0 && x >= open {
+			return m.openFile()
+		}
+		if m.overlay == noOverlay && export >= 0 && x >= export && m.canExport() {
+			return m.openExport()
+		}
 	}
 	if m.overlay != noOverlay {
 		if m.overlay == segmentsOverlay || m.overlay == rangesOverlay {
@@ -37,7 +46,7 @@ func (m *Model) click(mouse tea.Mouse) tea.Cmd {
 					}
 				}
 			}
-		} else if m.overlay == fileOverlay && mouse.Y >= 10 {
+		} else if (m.overlay == fileOverlay || m.overlay == exportOverlay) && mouse.Y >= 10 {
 			index := mouse.Y - 10
 			if index < len(m.fileOptions) {
 				m.suggestion = index

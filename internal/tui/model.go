@@ -30,6 +30,8 @@ const (
 	helpOverlay
 	fieldsOverlay
 	fileOverlay
+	exportOverlay
+	overwriteOverlay
 	segmentsOverlay
 	rangesOverlay
 )
@@ -105,6 +107,8 @@ type Model struct {
 	fileOptions                []string
 	pathSequence               uint64
 	message                    string
+	exporting                  bool
+	exportXML, exportPath      string
 	failed                     bool
 }
 
@@ -496,8 +500,11 @@ func (m *Model) Update(message tea.Msg) (tea.Model, tea.Cmd) {
 		m.setDocument(msg.doc, msg.path)
 		m.message = "Opened " + msg.doc.Name
 		return m, nil
+	case exportResult:
+		m.exportDone(msg)
+		return m, nil
 	case pathResult:
-		if msg.sequence == m.pathSequence && m.overlay == fileOverlay {
+		if msg.sequence == m.pathSequence && (m.overlay == fileOverlay || m.overlay == exportOverlay) {
 			m.fileOptions = msg.options
 		}
 		return m, nil
@@ -531,7 +538,7 @@ func (m *Model) Update(message tea.Msg) (tea.Model, tea.Cmd) {
 			}
 		}
 		m.clearTextSelection()
-		if key == "ctrl+c" && m.focus != inputFocus && m.overlay != fileOverlay && !m.browseEditing {
+		if key == "ctrl+c" && m.focus != inputFocus && m.overlay != fileOverlay && m.overlay != exportOverlay && !m.browseEditing {
 			return m, m.copyID()
 		}
 		if key == "ctrl+o" {
@@ -539,6 +546,9 @@ func (m *Model) Update(message tea.Msg) (tea.Model, tea.Cmd) {
 		}
 		if m.overlay != noOverlay {
 			return m, m.overlayKey(msg)
+		}
+		if key == "ctrl+e" && m.focus != inputFocus {
+			return m, m.openExport()
 		}
 		switch key {
 		case "alt+h":
@@ -638,12 +648,12 @@ func (m *Model) Update(message tea.Msg) (tea.Model, tea.Cmd) {
 		}
 		return m, nil
 	default:
-		if m.overlay == fileOverlay || m.browseEditing {
+		if m.overlay == fileOverlay || m.overlay == exportOverlay || m.browseEditing {
 			old := m.dialog.Value()
 			var cmd tea.Cmd
 			m.dialog, cmd = m.dialog.Update(message)
 			if old != m.dialog.Value() {
-				if m.overlay == fileOverlay {
+				if m.overlay == fileOverlay || m.overlay == exportOverlay {
 					return m, tea.Batch(cmd, m.pathCommand())
 				}
 				m.filterBrowse()

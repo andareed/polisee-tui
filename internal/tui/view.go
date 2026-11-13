@@ -204,11 +204,20 @@ func (m *Model) detailLines() []string {
 	return lines[:min(len(lines), height)]
 }
 
+func (m *Model) headerActions() string {
+	actions := selectedStyle.Render(" [Ctrl+O] Open policy ")
+	if m.canExport() {
+		actions = accent.Render(" [Ctrl+E] Export ") + actions
+	}
+	return ansi.Truncate(actions, max(1, m.width), "…")
+}
+
 func (m *Model) View() tea.View {
 	width, height := max(1, m.width), max(1, m.height)
 	var lines []string
 	brand := accent.Bold(true).Render("P · polisee") + muted.Render("   EyeSight Policy Viewer")
-	lines = append(lines, balanced(" "+brand, selectedStyle.Render(" [Ctrl+O] Open policy "), width))
+	actions := m.headerActions()
+	lines = append(lines, fit(" "+brand, max(0, width-ansi.StringWidth(actions)))+actions)
 	counts := fmt.Sprintf("%d folders · %d policies · %d rules", m.doc.Folders, m.doc.Policies, m.doc.Rules)
 	name := m.doc.Name
 	if m.loading {

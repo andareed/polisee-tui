@@ -8,7 +8,7 @@ contextual inspector.
 
 ## Download
 
-The [v0.1.0 Linux x86-64 release](https://github.com/andareed/polisee-tui/releases/tag/v0.1.0)
+The [v0.2.0 Linux x86-64 release](https://github.com/andareed/polisee-tui/releases/tag/v0.2.0)
 contains a static executable named polisee-tui. Extract the archive, then run:
 
 ```sh
@@ -52,10 +52,16 @@ repository metadata. No `GOFLAGS` workaround is needed.
 Bubble Tea, Bubbles and Lip Gloss use their current v2 module paths at
 [charm.land](https://github.com/charmbracelet/bubbletea/blob/main/UPGRADE_GUIDE_V2.md).
 
-Exports are read locally, never modified or uploaded. Open a new file with
+Source exports are read locally, never modified or uploaded. Open a new file with
 **Ctrl+O**; type a path, use Tab or the suggestions, and press Enter. A failed
 open preserves the current document. Files must be regular UTF-8 policy XML
 exports up to 64 MiB. Nothing scans the private data directory on startup.
+
+Select a main policy and choose **Export** in the header or press **Ctrl+E**.
+Choose a destination path and press Enter; Tab completes paths. Existing files
+require replacement confirmation, and the loaded source file is protected.
+The XML includes the whole policy and its subrules in EyeSight’s `RULES` format.
+Single-policy exports can also be reopened in Polisee.
 
 ## Browsing
 
@@ -132,6 +138,7 @@ exports up to 64 MiB. Nothing scans the private data directory on startup.
 | p; Ctrl+C | Pin; copy selected text, otherwise the selected ID |
 | d; v | Diagnostics; Visual/Text conditions |
 | /; Page Up/Down; m in a browser | Literal filter; page; segment metadata |
+| Ctrl+E | Export the selected main policy with all subrules |
 | Ctrl+O; r | Open local XML; reload the explicit file |
 | Drag / hold and drag | Select text in details or exported fields |
 | Escape with a selection | Clear the selection |

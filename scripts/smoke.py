@@ -6,6 +6,7 @@ import shlex
 import subprocess
 import tempfile
 import time
+import xml.etree.ElementTree as ET
 
 project = Path(__file__).resolve().parents[1]
 code_root = next(
@@ -116,6 +117,22 @@ try:
     assert "Ctrl+Q quit" in frame.splitlines()[-1], "quit shortcut is missing from the bottom bar"
     assert "e/E" not in frame, "duplicate expand/collapse shortcuts remain in the headers"
     (artifacts / "demo-terminal.txt").write_text(frame)
+    export_path = artifacts / "single-policy-smoke.xml"
+    export_path.unlink(missing_ok=True)
+    keys("C-e")
+    wait_for("Export selected policy", "Enter saves")
+    keys("C-a", "C-k")
+    text(str(export_path))
+    keys("Enter")
+    wait_for("Exported policy to", "Office access")
+    exported = ET.parse(export_path).getroot()
+    assert exported.tag == "RULES" and len(exported) == 1, "single-policy export wrapper differs"
+    assert exported[0].get("ID") == "office" and len(list(exported.iter("INNER_RULE"))) == 2, "export lost subrules"
+    keys("C-e")
+    wait_for("Export selected policy")
+    keys("Escape")
+    wait_for("Office access", "Conditions")
+
     assert "FILTER_ID" not in frame and "Filter ID" not in frame, "filter ID is visible with diagnostics off"
     text("d")
     frame = wait_for('PLUGIN_NAME="Inventory"', 'FILTER_ID="first"')

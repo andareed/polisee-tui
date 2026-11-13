@@ -38,6 +38,7 @@ var helpText = []string{
 	"d                 Toggle contextual diagnostic strips",
 	"v                 Switch Visual / Text conditions",
 	"Ctrl+O            Open a local XML export; Tab completes paths",
+	"Ctrl+E            Export selected main policy with all subrules",
 	"Ctrl+Q            Quit confirmation: Enter quits, Esc cancels",
 	"r                 Reload the explicitly opened file",
 	"",
@@ -56,7 +57,7 @@ var helpText = []string{
 	"Policy matching and field labels come from polisee-lib.",
 	"External expressions remain unavailable. Criteria are not evaluated.",
 	"Range search matches literal exported text; it does not infer containment.",
-	"Exports are read locally and never modified or uploaded.",
+	"Source exports are read locally; individual policies can be saved as XML.",
 }
 
 func (m *Model) showFields(context *fields) {
@@ -224,6 +225,9 @@ func (m *Model) fileKey(msg tea.KeyPressMsg) tea.Cmd {
 			m.dialog.CursorEnd()
 			return m.pathCommand()
 		}
+		if m.overlay == exportOverlay {
+			return m.saveExport(path, false)
+		}
 		m.closeOverlay()
 		return m.load(path)
 	}
@@ -384,7 +388,17 @@ func (m *Model) browseInspect() {
 }
 func (m *Model) overlayKey(msg tea.KeyPressMsg) tea.Cmd {
 	key := msg.String()
-	if m.overlay == fileOverlay {
+	if m.overlay == overwriteOverlay {
+		switch key {
+		case "esc":
+			m.overlay = exportOverlay
+			return m.dialog.Focus()
+		case "enter":
+			return m.saveExport(m.exportPath, true)
+		}
+		return nil
+	}
+	if m.overlay == fileOverlay || m.overlay == exportOverlay {
 		return m.fileKey(msg)
 	}
 	if m.overlay == helpOverlay || m.overlay == fieldsOverlay {
@@ -495,9 +509,16 @@ func (m *Model) overlayContent() (string, []string) {
 	case fieldsOverlay:
 		title = "Exported fields · " + m.inspected.Name + " · exact quoted values"
 		content = fieldLines(m.inspected, max(1, width-6))
-	case fileOverlay:
+	case overwriteOverlay:
+		title = "Replace existing export?"
+		content = []string{"", normal.Render(one(m.exportPath)), "", muted.Render("Enter replaces this file · Esc returns to the save dialog")}
+	case fileOverlay, exportOverlay:
 		title = "Open policy XML · local files"
 		content = []string{"", m.dialog.View(), "", muted.Render("Enter opens · Tab completes · ↑/↓ suggestions · Esc returns"), ""}
+		if m.overlay == exportOverlay {
+			title = "Export selected policy · save XML"
+			content[3] = muted.Render("Enter saves · Tab completes · ↑/↓ suggestions · Esc cancels")
+		}
 		for i, option := range m.fileOptions {
 			style := muted
 			prefix := "  "
@@ -507,7 +528,11 @@ func (m *Model) overlayContent() (string, []string) {
 			}
 			content = append(content, style.Render(prefix+one(option)))
 		}
-		content = append(content, "", dim.Render("Exports up to 64 MiB · failed opens keep the current document."))
+		if m.overlay == exportOverlay {
+			content = append(content, "", dim.Render("Complete policy and subrules · EyeSight RULES XML · source preserved."))
+		} else {
+			content = append(content, "", dim.Render("Exports up to 64 MiB · failed opens keep the current document."))
+		}
 	}
 	return title, content
 }
